@@ -15,7 +15,7 @@ function addReact(t1, t2, name, mult, xpMag, col, blend){
 }
 
 // PASSIVES
-addPassive('hp', 'HP', '❤', '+20 health', 5, '#ff5252', s=>{ s.hp += 20; });
+addPassive('hp', 'HP', '❤', '+20 health', 5, '#ff5252', s=>{ s.hp += 20; s.maxHp += 20; });
 addPassive('power', 'Power', '⚡', '+8% damage', 5, '#ffd740', s=>{ s.pow *= 1.08; });
 addPassive('speed', 'Speed', '💨', '+5% attack speed', 5, '#4fc3f7', s=>{ s.spd *= 1.05; });
 addPassive('armor', 'Armor', '🛡', '+3% damage reduction', 5, '#42a5f5', s=>{ s.arm += 0.03; });
