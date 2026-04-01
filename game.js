@@ -7,7 +7,7 @@ class Game {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.gameTime = 0;
-    this.state = 'menu'; // menu, playing, paused, gameOver, upgrades, settings, levelUp
+    this.state = 'menu';
     this.player = null;
     this.enemies = [];
     this.bullets = [];
@@ -25,14 +25,10 @@ class Game {
     this.lastAutoSave = 0;
     this.save = A.loadSave();
     this.settings = this.save.settings;
-    this.enemyPool = [];
-    this.bulletPool = [];
-    this.particlePool = [];
     this.bossesSpawned = 0;
     this.nextBossWave = A.CFG.BOSS_INTERVAL;
     
     this.setupInput();
-    this.setupPools();
     A.SND.init();
   }
 
@@ -57,7 +53,6 @@ class Game {
       if (e.key === 'Shift') this.input.dash = false;
     });
 
-    // Mouse/touch support
     this.canvas.addEventListener('click', (e) => this.handleCanvasClick(e));
   }
 
@@ -77,21 +72,15 @@ class Game {
   handleMenuClick(x, y){
     const w = this.canvas.width;
     const h = this.canvas.height;
-    // Play button
-    if (x > w / 2 - 100 && x < w / 2 + 100 &&
-        y > h / 2 + 80 && y < h / 2 + 140){
+    if (x > w / 2 - 100 && x < w / 2 + 100 && y > h / 2 + 80 && y < h / 2 + 140){
       this.startGame();
       A.SND.play('select');
     }
-    // Upgrades button
-    if (x > w / 2 - 100 && x < w / 2 + 100 &&
-        y > h / 2 + 160 && y < h / 2 + 220){
+    if (x > w / 2 - 100 && x < w / 2 + 100 && y > h / 2 + 160 && y < h / 2 + 220){
       this.state = 'upgrades';
       A.SND.play('select');
     }
-    // Settings button
-    if (x > w / 2 - 100 && x < w / 2 + 100 &&
-        y > h / 2 + 240 && y < h / 2 + 300){
+    if (x > w / 2 - 100 && x < w / 2 + 100 && y > h / 2 + 240 && y < h / 2 + 300){
       this.state = 'settings';
       A.SND.play('select');
     }
@@ -100,15 +89,11 @@ class Game {
   handlePauseClick(x, y){
     const w = this.canvas.width;
     const h = this.canvas.height;
-    // Resume button
-    if (x > w / 2 - 80 && x < w / 2 + 80 &&
-        y > h / 2 + 20 && y < h / 2 + 70){
+    if (x > w / 2 - 80 && x < w / 2 + 80 && y > h / 2 + 20 && y < h / 2 + 70){
       this.togglePause();
       A.SND.play('select');
     }
-    // Quit button
-    if (x > w / 2 - 80 && x < w / 2 + 80 &&
-        y > h / 2 + 90 && y < h / 2 + 140){
+    if (x > w / 2 - 80 && x < w / 2 + 80 && y > h / 2 + 90 && y < h / 2 + 140){
       this.state = 'menu';
       A.SND.play('select');
     }
@@ -117,9 +102,7 @@ class Game {
   handleGameOverClick(x, y){
     const w = this.canvas.width;
     const h = this.canvas.height;
-    // Restart button
-    if (x > w / 2 - 80 && x < w / 2 + 80 &&
-        y > h / 2 + 140 && y < h / 2 + 190){
+    if (x > w / 2 - 80 && x < w / 2 + 80 && y > h / 2 + 140 && y < h / 2 + 190){
       this.startGame();
       A.SND.play('select');
     }
@@ -128,15 +111,12 @@ class Game {
   handleUpgradesClick(x, y){
     const w = this.canvas.width;
     const h = this.canvas.height;
-    // Back button
-    if (x > w / 2 - 80 && x < w / 2 + 80 &&
-        y > h - 80 && y < h - 30){
+    if (x > w / 2 - 80 && x < w / 2 + 80 && y > h - 80 && y < h - 30){
       this.state = 'menu';
       A.SND.play('select');
       return;
     }
 
-    // Upgrade passives
     const startY = 180;
     const passives = Object.keys(A.PASS);
     for (let i = 0; i < passives.length; i++){
@@ -145,9 +125,7 @@ class Game {
       const level = this.save.meta[key] || 0;
       const cost = Math.floor(100 * Math.pow(1.15, level));
 
-      if (level < passive.max && this.save.shards >= cost &&
-          x > w / 2 && x < w - 40 &&
-          y > startY + i * 35 - 15 && y < startY + i * 35 + 15){
+      if (level < passive.max && this.save.shards >= cost && x > w / 2 && x < w - 40 && y > startY + i * 35 - 15 && y < startY + i * 35 + 15){
         this.save.shards -= cost;
         this.save.meta[key] = level + 1;
         A.saveSave(this.save);
@@ -159,25 +137,19 @@ class Game {
   handleSettingsClick(x, y){
     const w = this.canvas.width;
     const h = this.canvas.height;
-    // Screen shake toggle
-    if (x > w - 100 && x < w - 50 &&
-        y > 130 && y < 160){
+    if (x > w - 100 && x < w - 50 && y > 130 && y < 160){
       this.save.settings.screenShake = !this.save.settings.screenShake;
       A.saveSave(this.save);
       A.SND.play('select');
     }
 
-    // Flash toggle
-    if (x > w - 100 && x < w - 50 &&
-        y > 190 && y < 220){
+    if (x > w - 100 && x < w - 50 && y > 190 && y < 220){
       this.save.settings.flash = !this.save.settings.flash;
       A.saveSave(this.save);
       A.SND.play('select');
     }
 
-    // Back button
-    if (x > w / 2 - 80 && x < w / 2 + 80 &&
-        y > h - 80 && y < h - 30){
+    if (x > w / 2 - 80 && x < w / 2 + 80 && y > h - 80 && y < h - 30){
       this.state = 'menu';
       A.SND.play('select');
     }
@@ -191,25 +163,12 @@ class Game {
       const choice = choices[i];
       if (!choice) continue;
       const buttonY = h / 2 + (i - 1) * 80;
-      if (x > w / 2 - 120 && x < w / 2 + 120 &&
-          y > buttonY && y < buttonY + 60){
+      if (x > w / 2 - 120 && x < w / 2 + 120 && y > buttonY && y < buttonY + 60){
         this.applyLevelUpChoice(choice);
         this.state = 'playing';
         A.SND.play('select');
         break;
       }
-    }
-  }
-
-  setupPools(){
-    for (let i = 0; i < A.CFG.MAX_EN; i++){
-      this.enemyPool.push(new A.Enemy(0, 0, 'normal'));
-    }
-    for (let i = 0; i < A.CFG.MAX_BUL; i++){
-      this.bulletPool.push(new A.Bullet(0, 0, 0, 0, 5, '#fff', 1, 'normal'));
-    }
-    for (let i = 0; i < A.CFG.MAX_FX; i++){
-      this.particlePool.push(new A.Particle(0, 0, 0, 0, 3, '#fff', 1));
     }
   }
 
@@ -226,9 +185,8 @@ class Game {
     this.enemyBullets = [];
     this.particles = [];
     this.texts = [];
-    this.player = new A.Player(A.CFG.WORLD_SIZE / 2, A.CFG.WORLD_SIZE / 2);
+    this.player = new A.Player(this.canvas.width / 2, this.canvas.height / 2);
     
-    // Apply saved passives
     for (let key in this.save.meta){
       const level = this.save.meta[key];
       if (level > 0 && A.PASS[key]){
@@ -259,20 +217,26 @@ class Game {
   spawnEnemies(){
     this.waveCount++;
     const count = Math.floor(3 + this.waveCount * 0.5);
+    const canvasW = this.canvas.width;
+    const canvasH = this.canvas.height;
+    
     for (let i = 0; i < count; i++){
       const angle = Math.random() * Math.PI * 2;
-      const dist = 300 + Math.random() * 200;
+      const dist = Math.min(120, canvasW / 4);
       const x = this.player.x + Math.cos(angle) * dist;
       const y = this.player.y + Math.sin(angle) * dist;
       
+      const spawnX = A.U.clamp(x, 30, canvasW - 30);
+      const spawnY = A.U.clamp(y, 30, canvasH - 30);
+      
       let enemy;
       if (this.waveCount >= this.nextBossWave && this.bossesSpawned < A.CFG.MAX_BOSSES){
-        enemy = new A.Boss(x, y);
+        enemy = new A.Boss(spawnX, spawnY);
         this.bossesSpawned++;
         this.nextBossWave += A.CFG.BOSS_INTERVAL;
         A.SND.play('boss');
       } else {
-        enemy = new A.Enemy(x, y, 'normal');
+        enemy = new A.Enemy(spawnX, spawnY, 'normal');
         enemy.color = A.pick(['#ff6b6b', '#ff9800', '#ffd740', '#81c784', '#64b5f6']);
       }
       
@@ -283,7 +247,6 @@ class Game {
   generateLevelUpChoices(){
     this.levelUpChoices = [];
     
-    // Weapon choices
     for (let w in this.player.weapons){
       if (!this.save.unlocked[w]){
         this.levelUpChoices.push({
@@ -295,7 +258,6 @@ class Game {
       }
     }
 
-    // Passive choices
     const passiveKeys = Object.keys(A.PASS);
     while (this.levelUpChoices.length < 3 && passiveKeys.length > 0){
       const key = A.pick(passiveKeys);
@@ -347,7 +309,6 @@ class Game {
 
     this.player.update(dt, this.input, this);
 
-    // Update enemies
     for (let i = this.enemies.length - 1; i >= 0; i--){
       const e = this.enemies[i];
       e.update(dt, this.player, this);
@@ -376,7 +337,6 @@ class Game {
       if (!e.a) this.enemies.splice(i, 1);
     }
 
-    // Update bullets
     for (let i = this.bullets.length - 1; i >= 0; i--){
       const b = this.bullets[i];
       b.update(dt);
@@ -399,7 +359,6 @@ class Game {
       if (hit || !b.a) this.bullets.splice(i, 1);
     }
 
-    // Update enemy bullets
     for (let i = this.enemyBullets.length - 1; i >= 0; i--){
       const b = this.enemyBullets[i];
       b.update(dt);
@@ -412,26 +371,22 @@ class Game {
       if (!b.a) this.enemyBullets.splice(i, 1);
     }
 
-    // Update particles
     for (let i = this.particles.length - 1; i >= 0; i--){
       const p = this.particles[i];
       p.update(dt);
       if (!p.a) this.particles.splice(i, 1);
     }
 
-    // Update text floaties
     for (let i = this.texts.length - 1; i >= 0; i--){
       const t = this.texts[i];
       t.update(dt);
       if (!t.a) this.texts.splice(i, 1);
     }
 
-    // Spawn wave
     if (this.enemies.length < 2){
       this.spawnEnemies();
     }
 
-    // Level up check
     if (this.player.level > (this.save.stats.bestScore || 0)){
       this.save.stats.bestScore = this.score;
     }
@@ -451,7 +406,6 @@ class Game {
     const w = this.canvas.width;
     const h = this.canvas.height;
 
-    // Apply screen shake
     cx.save();
     if (this.screenShake > 0){
       const shake = this.screenShake * 5;
@@ -478,7 +432,6 @@ class Game {
       A.UI.drawHUD(cx, this, this.player, this.save);
     }
 
-    // Flash screen
     if (this.flashScreen > 0){
       cx.fillStyle = `rgba(255, 255, 255, ${this.flashScreen})`;
       cx.fillRect(0, 0, w, h);
@@ -493,11 +446,9 @@ class Game {
     const w = this.canvas.width;
     const h = this.canvas.height;
 
-    // Background
     cx.fillStyle = '#0a0e27';
     cx.fillRect(0, 0, w, h);
 
-    // Grid
     cx.strokeStyle = '#1a2a4a';
     cx.lineWidth = 1;
     const gridSize = 50;
@@ -514,7 +465,6 @@ class Game {
       cx.stroke();
     }
 
-    // Draw all entities
     this.particles.forEach(p => p.draw(cx));
     this.enemyBullets.forEach(b => b.draw(cx));
     this.bullets.forEach(b => b.draw(cx));
@@ -540,27 +490,6 @@ class Game {
     };
 
     requestAnimationFrame(loop);
-  }
-}
-
-// Start game when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    A.SND.init();
-    const canvas = document.getElementById('gameCanvas') || document.querySelector('canvas');
-    if (canvas){
-      const game = new Game(canvas);
-      game.run();
-      window.game = game;
-    }
-  });
-} else {
-  A.SND.init();
-  const canvas = document.getElementById('gameCanvas') || document.querySelector('canvas');
-  if (canvas){
-    const game = new Game(canvas);
-    game.run();
-    window.game = game;
   }
 }
 
