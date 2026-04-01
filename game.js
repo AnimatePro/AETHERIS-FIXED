@@ -7,7 +7,7 @@ class Game {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.gameTime = 0;
-    this.state = 'menu'; // menu, playing, paused, gameOver, upgrades, settings
+    this.state = 'menu'; // menu, playing, paused, gameOver, upgrades, settings, levelUp
     this.player = null;
     this.enemies = [];
     this.bullets = [];
@@ -34,7 +34,6 @@ class Game {
     this.setupInput();
     this.setupPools();
     A.SND.init();
-    this.drawMainMenu();
   }
 
   setupInput(){
@@ -76,56 +75,65 @@ class Game {
   }
 
   handleMenuClick(x, y){
+    const w = this.canvas.width;
+    const h = this.canvas.height;
     // Play button
-    if (x > this.canvas.width / 2 - 100 && x < this.canvas.width / 2 + 100 &&
-        y > this.canvas.height / 2 + 80 && y < this.canvas.height / 2 + 140){
+    if (x > w / 2 - 100 && x < w / 2 + 100 &&
+        y > h / 2 + 80 && y < h / 2 + 140){
       this.startGame();
       A.SND.play('select');
     }
     // Upgrades button
-    if (x > this.canvas.width / 2 - 100 && x < this.canvas.width / 2 + 100 &&
-        y > this.canvas.height / 2 + 160 && y < this.canvas.height / 2 + 220){
+    if (x > w / 2 - 100 && x < w / 2 + 100 &&
+        y > h / 2 + 160 && y < h / 2 + 220){
       this.state = 'upgrades';
       A.SND.play('select');
     }
     // Settings button
-    if (x > this.canvas.width / 2 - 100 && x < this.canvas.width / 2 + 100 &&
-        y > this.canvas.height / 2 + 240 && y < this.canvas.height / 2 + 300){
+    if (x > w / 2 - 100 && x < w / 2 + 100 &&
+        y > h / 2 + 240 && y < h / 2 + 300){
       this.state = 'settings';
       A.SND.play('select');
     }
   }
 
   handlePauseClick(x, y){
+    const w = this.canvas.width;
+    const h = this.canvas.height;
     // Resume button
-    if (x > this.canvas.width / 2 - 80 && x < this.canvas.width / 2 + 80 &&
-        y > this.canvas.height / 2 + 20 && y < this.canvas.height / 2 + 70){
+    if (x > w / 2 - 80 && x < w / 2 + 80 &&
+        y > h / 2 + 20 && y < h / 2 + 70){
       this.togglePause();
       A.SND.play('select');
     }
     // Quit button
-    if (x > this.canvas.width / 2 - 80 && x < this.canvas.width / 2 + 80 &&
-        y > this.canvas.height / 2 + 90 && y < this.canvas.height / 2 + 140){
+    if (x > w / 2 - 80 && x < w / 2 + 80 &&
+        y > h / 2 + 90 && y < h / 2 + 140){
       this.state = 'menu';
       A.SND.play('select');
     }
   }
 
   handleGameOverClick(x, y){
+    const w = this.canvas.width;
+    const h = this.canvas.height;
     // Restart button
-    if (x > this.canvas.width / 2 - 80 && x < this.canvas.width / 2 + 80 &&
-        y > this.canvas.height / 2 + 140 && y < this.canvas.height / 2 + 190){
+    if (x > w / 2 - 80 && x < w / 2 + 80 &&
+        y > h / 2 + 140 && y < h / 2 + 190){
       this.startGame();
       A.SND.play('select');
     }
   }
 
   handleUpgradesClick(x, y){
+    const w = this.canvas.width;
+    const h = this.canvas.height;
     // Back button
-    if (x > this.canvas.width / 2 - 80 && x < this.canvas.width / 2 + 80 &&
-        y > this.canvas.height - 80 && y < this.canvas.height - 30){
+    if (x > w / 2 - 80 && x < w / 2 + 80 &&
+        y > h - 80 && y < h - 30){
       this.state = 'menu';
       A.SND.play('select');
+      return;
     }
 
     // Upgrade passives
@@ -138,46 +146,52 @@ class Game {
       const cost = Math.floor(100 * Math.pow(1.15, level));
 
       if (level < passive.max && this.save.shards >= cost &&
-          x > this.canvas.width / 2 && x < this.canvas.width - 40 &&
+          x > w / 2 && x < w - 40 &&
           y > startY + i * 35 - 15 && y < startY + i * 35 + 15){
         this.save.shards -= cost;
         this.save.meta[key] = level + 1;
-        passive.apply(this.player || {});
+        A.saveSave(this.save);
         A.SND.play('select');
       }
     }
   }
 
   handleSettingsClick(x, y){
+    const w = this.canvas.width;
+    const h = this.canvas.height;
     // Screen shake toggle
-    if (x > this.canvas.width - 100 && x < this.canvas.width - 50 &&
+    if (x > w - 100 && x < w - 50 &&
         y > 130 && y < 160){
       this.save.settings.screenShake = !this.save.settings.screenShake;
+      A.saveSave(this.save);
       A.SND.play('select');
     }
 
     // Flash toggle
-    if (x > this.canvas.width - 100 && x < this.canvas.width - 50 &&
+    if (x > w - 100 && x < w - 50 &&
         y > 190 && y < 220){
       this.save.settings.flash = !this.save.settings.flash;
+      A.saveSave(this.save);
       A.SND.play('select');
     }
 
     // Back button
-    if (x > this.canvas.width / 2 - 80 && x < this.canvas.width / 2 + 80 &&
-        y > this.canvas.height - 80 && y < this.canvas.height - 30){
+    if (x > w / 2 - 80 && x < w / 2 + 80 &&
+        y > h - 80 && y < h - 30){
       this.state = 'menu';
       A.SND.play('select');
     }
   }
 
   handleLevelUpClick(x, y){
+    const w = this.canvas.width;
+    const h = this.canvas.height;
     const choices = this.levelUpChoices || [];
     for (let i = 0; i < 3; i++){
       const choice = choices[i];
       if (!choice) continue;
-      const buttonY = this.canvas.height / 2 + (i - 1) * 80;
-      if (x > this.canvas.width / 2 - 120 && x < this.canvas.width / 2 + 120 &&
+      const buttonY = h / 2 + (i - 1) * 80;
+      if (x > w / 2 - 120 && x < w / 2 + 120 &&
           y > buttonY && y < buttonY + 60){
         this.applyLevelUpChoice(choice);
         this.state = 'playing';
@@ -242,10 +256,6 @@ class Game {
     this.startGame();
   }
 
-  drawMainMenu(){
-    this.state = 'menu';
-  }
-
   spawnEnemies(){
     this.waveCount++;
     const count = Math.floor(3 + this.waveCount * 0.5);
@@ -268,18 +278,6 @@ class Game {
       
       this.enemies.push(enemy);
     }
-  }
-
-  applyLevelUpChoice(choice){
-    if (choice.type === 'passive'){
-      const level = this.save.meta[choice.key] || 0;
-      this.save.meta[choice.key] = level + 1;
-      A.PASS[choice.key].apply(this.player);
-    } else if (choice.type === 'weapon'){
-      this.save.unlocked[choice.key] = true;
-      this.player.weapons[choice.key] = true;
-    }
-    A.SND.play('evo');
   }
 
   generateLevelUpChoices(){
@@ -314,6 +312,19 @@ class Game {
     }
 
     if (this.levelUpChoices.length > 3) this.levelUpChoices = this.levelUpChoices.slice(0, 3);
+  }
+
+  applyLevelUpChoice(choice){
+    if (choice.type === 'passive'){
+      const level = this.save.meta[choice.key] || 0;
+      this.save.meta[choice.key] = level + 1;
+      A.PASS[choice.key].apply(this.player);
+    } else if (choice.type === 'weapon'){
+      this.save.unlocked[choice.key] = true;
+      this.player.weapons[choice.key] = true;
+    }
+    A.saveSave(this.save);
+    A.SND.play('evo');
   }
 
   update(dt){
@@ -532,14 +543,26 @@ class Game {
   }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
+// Start game when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    A.SND.init();
+    const canvas = document.getElementById('gameCanvas') || document.querySelector('canvas');
+    if (canvas){
+      const game = new Game(canvas);
+      game.run();
+      window.game = game;
+    }
+  });
+} else {
   A.SND.init();
   const canvas = document.getElementById('gameCanvas') || document.querySelector('canvas');
   if (canvas){
     const game = new Game(canvas);
     game.run();
+    window.game = game;
   }
-});
+}
 
 A.Game = Game;
 
