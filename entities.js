@@ -7,7 +7,7 @@ class Entity {
     this.x = x; this.y = y; this.r = r;
     this.vx = 0; this.vy = 0;
     this.hp = 1; this.maxHp = 1;
-    this.a = 1; // active flag
+    this.a = 1;
   }
   update(dt){}
   draw(cx){}
@@ -32,8 +32,8 @@ class Player extends Entity {
     this.level = 1;
     this.xp = 0;
     this.xpReq = A.CFG.XP_REQ;
-    this.energy = A.CFG.MAX_EN;
-    this.maxEnergy = A.CFG.MAX_EN;
+    this.energy = 100;
+    this.maxEnergy = 100;
     this.dashCd = 0;
     this.invulnTime = 0;
     this.dir = 0;
@@ -42,11 +42,9 @@ class Player extends Entity {
     this.weaponCds = {};
     for (let k in this.weapons) this.weaponCds[k] = 0;
     this.flashing = false;
-    this.flashTime = 0;
   }
 
   update(dt, input, game){
-    // Movement
     this.vx = 0;
     this.vy = 0;
     this.moving = false;
@@ -65,11 +63,11 @@ class Player extends Entity {
     this.x += this.vx * dt;
     this.y += this.vy * dt;
     
-    // World bounds
-    this.x = A.U.clamp(this.x, this.r, A.CFG.WORLD_SIZE - this.r);
-    this.y = A.U.clamp(this.y, this.r, A.CFG.WORLD_SIZE - this.r);
+    const canvasW = game.canvas.width;
+    const canvasH = game.canvas.height;
+    this.x = A.U.clamp(this.x, this.r, canvasW - this.r);
+    this.y = A.U.clamp(this.y, this.r, canvasH - this.r);
     
-    // Dash
     if (input.dash && this.dashCd <= 0){
       this.vx = Math.cos(this.dir) * A.CFG.DASH_SPEED;
       this.vy = Math.sin(this.dir) * A.CFG.DASH_SPEED;
@@ -78,23 +76,18 @@ class Player extends Entity {
     }
     this.dashCd -= dt;
     
-    // Regen
     if (this.hp < this.maxHp){
       this.hp += this.reg * dt;
       if (this.hp > this.maxHp) this.hp = this.maxHp;
     }
     
-    // Invulnerability
     this.invulnTime -= dt;
     this.flashing = this.invulnTime > 0;
     
-    // Energy
     this.energy = Math.min(this.energy + 30 * dt, this.maxEnergy);
     
-    // Weapon cooldowns
     for (let k in this.weaponCds) this.weaponCds[k] -= dt;
     
-    // Weapon fire
     if (input.shoot && this.energy >= 10){
       this.fireWeapons(game);
       this.energy -= 10;
@@ -167,9 +160,9 @@ class Player extends Entity {
     const actualDamage = amount * (1 - this.arm);
     this.hp -= actualDamage;
     this.invulnTime = A.CFG.P_INV;
-    A.SND.play('ouch');
-    if (game.settings.screenShake) game.screenShake = 0.08;
-    if (game.settings.flash) game.flashScreen = 0.1;
+    A.SND.play('hit');
+    if (game.save.settings.screenShake) game.screenShake = 0.08;
+    if (game.save.settings.flash) game.flashScreen = 0.1;
   }
 
   gainXP(amount, game){
@@ -194,7 +187,6 @@ class Player extends Entity {
     cx.lineWidth = 2;
     cx.stroke();
     
-    // Direction indicator
     const dirLen = this.r * 0.7;
     cx.strokeStyle = '#ffd700';
     cx.lineWidth = 2;
@@ -215,9 +207,7 @@ class Enemy extends Entity {
     this.damage = 5;
     this.xpReward = 5;
     this.color = '#ff6b6b';
-    this.target = null;
     this.shootCd = 0;
-    this.elements = [];
   }
 
   update(dt, player, game){
@@ -236,7 +226,7 @@ class Enemy extends Entity {
     this.y += this.vy * dt;
     
     this.shootCd -= dt;
-    if (this.shootCd <= 0 && dist < 200){
+    if (this.shootCd <= 0 && dist < 300){
       this.shoot(game, player);
       this.shootCd = A.U.rand(0.8, 1.5);
     }
@@ -349,14 +339,9 @@ class Bullet extends Entity {
     
     this.trail.push({ x: this.x, y: this.y });
     if (this.trail.length > 20) this.trail.shift();
-    
-    if (this.x < 0 || this.x > A.CFG.WORLD_SIZE || this.y < 0 || this.y > A.CFG.WORLD_SIZE){
-      this.a = 0;
-    }
   }
 
   draw(cx){
-    // Trail
     cx.strokeStyle = this.color;
     cx.globalAlpha = 0.3;
     cx.lineWidth = this.r * 0.5;
@@ -370,7 +355,6 @@ class Bullet extends Entity {
     }
     cx.globalAlpha = 1;
     
-    // Main bullet
     cx.fillStyle = this.color;
     cx.beginPath();
     cx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
@@ -393,10 +377,6 @@ class EnemyBullet extends Entity {
     this.lifetime -= dt;
     
     if (this.lifetime <= 0) this.a = 0;
-    
-    if (this.x < 0 || this.x > A.CFG.WORLD_SIZE || this.y < 0 || this.y > A.CFG.WORLD_SIZE){
-      this.a = 0;
-    }
   }
 
   draw(cx){
@@ -424,7 +404,7 @@ class Particle extends Entity {
   update(dt){
     this.x += this.vx * dt;
     this.y += this.vy * dt;
-    this.vy += 200 * dt; // gravity
+    this.vy += 200 * dt;
     this.lifetime -= dt;
     
     if (this.lifetime <= 0) this.a = 0;
@@ -467,7 +447,6 @@ class TextFloaty extends Entity {
     cx.globalAlpha = 1;
   }
 }
-
 
 A.Entity = Entity;
 A.Player = Player;
