@@ -8,13 +8,11 @@ A.UI = {
     const barHeight = 20;
     const barWidth = 200;
     
-    // FPS Counter
     cx.fillStyle = '#fff';
     cx.font = '12px monospace';
     cx.textAlign = 'left';
     cx.fillText(`FPS: ${A.FPS.current}`, padding, padding + 12);
     
-    // HP Bar
     cx.fillStyle = '#ff4444';
     cx.fillRect(padding, padding + 20, barWidth, barHeight);
     cx.fillStyle = '#44ff44';
@@ -27,7 +25,6 @@ A.UI = {
     cx.textAlign = 'center';
     cx.fillText(`${Math.floor(player.hp)}/${player.maxHp}`, padding + barWidth / 2, padding + 35);
     
-    // Energy Bar
     cx.fillStyle = '#4488ff';
     cx.fillRect(padding, padding + 55, barWidth, barHeight);
     cx.fillStyle = '#ffff44';
@@ -40,13 +37,11 @@ A.UI = {
     cx.textAlign = 'center';
     cx.fillText(`Energy: ${Math.floor(player.energy)}`, padding + barWidth / 2, padding + 70);
     
-    // Level
     cx.fillStyle = '#fff';
     cx.font = 'bold 24px Arial';
     cx.textAlign = 'left';
     cx.fillText(`LVL ${player.level}`, padding, padding + 110);
     
-    // XP Bar
     cx.fillStyle = '#444';
     cx.fillRect(padding, padding + 115, barWidth, 16);
     cx.fillStyle = '#ffff00';
@@ -55,7 +50,6 @@ A.UI = {
     cx.lineWidth = 1;
     cx.strokeRect(padding, padding + 115, barWidth, 16);
     
-    // Stats on right
     cx.fillStyle = '#fff';
     cx.font = 'bold 12px Arial';
     cx.textAlign = 'right';
@@ -64,7 +58,6 @@ A.UI = {
     cx.fillText(`⚔️ Kills: ${game.kills}`, game.canvas.width - padding, padding + 60);
     cx.fillText(`🎯 Score: ${A.U.fmtNum(game.score)}`, game.canvas.width - padding, padding + 80);
     
-    // Weapon indicators
     const weapons = ['fireball', 'whip', 'chain', 'orbit', 'laser', 'frost'];
     const icons = ['🔥', '⚡', '⛓', '🌀', '💙', '❄'];
     let yPos = game.canvas.height - padding - (weapons.length * 25);
@@ -81,35 +74,27 @@ A.UI = {
   },
 
   drawPauseMenu(cx, game){
-    // Dark overlay
     cx.fillStyle = 'rgba(0, 0, 0, 0.7)';
     cx.fillRect(0, 0, game.canvas.width, game.canvas.height);
     
-    // Title
     cx.fillStyle = '#fff';
     cx.font = 'bold 48px Arial';
     cx.textAlign = 'center';
     cx.fillText('PAUSED', game.canvas.width / 2, game.canvas.height / 2 - 60);
     
-    // Resume button
     A.UI.drawButton(cx, game.canvas.width / 2 - 80, game.canvas.height / 2 + 20, 160, 50, 'RESUME', '#44ff44');
-    
-    // Quit button
     A.UI.drawButton(cx, game.canvas.width / 2 - 80, game.canvas.height / 2 + 90, 160, 50, 'QUIT', '#ff4444');
   },
 
   drawGameOverMenu(cx, game, save){
-    // Dark overlay
     cx.fillStyle = 'rgba(0, 0, 0, 0.85)';
     cx.fillRect(0, 0, game.canvas.width, game.canvas.height);
     
-    // Title
     cx.fillStyle = '#ff4444';
     cx.font = 'bold 64px Arial';
     cx.textAlign = 'center';
     cx.fillText('GAME OVER', game.canvas.width / 2, game.canvas.height / 2 - 100);
     
-    // Stats
     cx.fillStyle = '#fff';
     cx.font = '18px Arial';
     cx.textAlign = 'center';
@@ -120,16 +105,13 @@ A.UI = {
     cx.fillText(`Time: ${A.U.fmtTime(game.gameTime)}`, game.canvas.width / 2, game.canvas.height / 2 + 50);
     cx.fillText(`Enemies Killed: ${game.kills}`, game.canvas.width / 2, game.canvas.height / 2 + 85);
     
-    // Restart button
     A.UI.drawButton(cx, game.canvas.width / 2 - 80, game.canvas.height / 2 + 140, 160, 50, 'RESTART', '#44ff44');
   },
 
   drawMainMenu(cx, game, save){
-    // Background
     cx.fillStyle = '#1a1a2e';
     cx.fillRect(0, 0, game.canvas.width, game.canvas.height);
     
-    // Title
     cx.fillStyle = '#fff';
     cx.font = 'bold 72px Arial';
     cx.textAlign = 'center';
@@ -139,45 +121,34 @@ A.UI = {
     cx.font = '18px Arial';
     cx.fillText('A roguelike bullet hell', game.canvas.width / 2, 150);
     
-    // Shards display
     cx.fillStyle = '#ffff00';
     cx.font = 'bold 24px Arial';
     cx.fillText(`💰 Shards: ${save.shards}`, game.canvas.width / 2, 220);
     
-    // Stats
     cx.fillStyle = '#aaa';
     cx.font = '14px Arial';
     cx.fillText(`Best Score: ${A.U.fmtNum(save.stats.bestScore)}`, game.canvas.width / 2, 270);
     cx.fillText(`Total Runs: ${save.stats.totalRuns}`, game.canvas.width / 2, 300);
     cx.fillText(`Boss Kills: ${save.stats.bossesKilled}`, game.canvas.width / 2, 330);
     
-    // Play button
     A.UI.drawButton(cx, game.canvas.width / 2 - 100, game.canvas.height / 2 + 80, 200, 60, 'PLAY', '#44ff44');
-    
-    // Upgrades button
     A.UI.drawButton(cx, game.canvas.width / 2 - 100, game.canvas.height / 2 + 160, 200, 60, 'UPGRADES', '#4488ff');
-    
-    // Settings button
     A.UI.drawButton(cx, game.canvas.width / 2 - 100, game.canvas.height / 2 + 240, 200, 60, 'SETTINGS', '#ffaa44');
   },
 
   drawUpgradesMenu(cx, game, save){
-    // Background
     cx.fillStyle = 'rgba(0, 0, 0, 0.9)';
     cx.fillRect(0, 0, game.canvas.width, game.canvas.height);
     
-    // Title
     cx.fillStyle = '#fff';
     cx.font = 'bold 48px Arial';
     cx.textAlign = 'center';
     cx.fillText('UPGRADES', game.canvas.width / 2, 60);
     
-    // Shards
     cx.fillStyle = '#ffff00';
     cx.font = 'bold 24px Arial';
     cx.fillText(`💰 ${save.shards} Shards`, game.canvas.width / 2, 120);
     
-    // Passives list
     cx.fillStyle = '#fff';
     cx.font = 'bold 16px Arial';
     cx.textAlign = 'left';
@@ -203,22 +174,18 @@ A.UI = {
       cx.textAlign = 'left';
     }
     
-    // Back button
     A.UI.drawButton(cx, game.canvas.width / 2 - 80, game.canvas.height - 80, 160, 50, 'BACK', '#ff6b6b');
   },
 
   drawSettingsMenu(cx, game, save){
-    // Background
     cx.fillStyle = 'rgba(0, 0, 0, 0.9)';
     cx.fillRect(0, 0, game.canvas.width, game.canvas.height);
     
-    // Title
     cx.fillStyle = '#fff';
     cx.font = 'bold 48px Arial';
     cx.textAlign = 'center';
     cx.fillText('SETTINGS', game.canvas.width / 2, 60);
     
-    // Screen shake toggle
     cx.fillStyle = '#fff';
     cx.font = 'bold 18px Arial';
     cx.textAlign = 'left';
@@ -226,27 +193,22 @@ A.UI = {
     const shakeColor = (save.settings && save.settings.screenShake) ? '#44ff44' : '#ff4444';
     A.UI.drawToggle(cx, game.canvas.width - 100, 130, (save.settings && save.settings.screenShake), shakeColor);
     
-    // Flash toggle
     cx.fillText('Screen Flash', 40, 210);
     const flashColor = (save.settings && save.settings.flash) ? '#44ff44' : '#ff4444';
     A.UI.drawToggle(cx, game.canvas.width - 100, 190, (save.settings && save.settings.flash), flashColor);
     
-    // Back button
     A.UI.drawButton(cx, game.canvas.width / 2 - 80, game.canvas.height - 80, 160, 50, 'BACK', '#ff6b6b');
   },
 
   drawLevelUpMenu(cx, game){
-    // Overlay
     cx.fillStyle = 'rgba(0, 0, 0, 0.8)';
     cx.fillRect(0, 0, game.canvas.width, game.canvas.height);
     
-    // Title
     cx.fillStyle = '#ffff00';
     cx.font = 'bold 48px Arial';
     cx.textAlign = 'center';
     cx.fillText('LEVEL UP!', game.canvas.width / 2, 80);
     
-    // Three options
     const choices = game.levelUpChoices || [];
     for (let i = 0; i < 3; i++){
       const choice = choices[i];
@@ -263,16 +225,13 @@ A.UI = {
   },
 
   drawButton(cx, x, y, w, h, text, color){
-    // Button background
     cx.fillStyle = color;
     A.roundRect(cx, x, y, w, h, 8);
     
-    // Border
     cx.strokeStyle = '#fff';
     cx.lineWidth = 2;
     A.strokeRoundRect(cx, x, y, w, h, 8);
     
-    // Text
     cx.fillStyle = '#000';
     cx.font = 'bold 20px Arial';
     cx.textAlign = 'center';
@@ -286,11 +245,9 @@ A.UI = {
     const h = 30;
     const r = h / 2;
     
-    // Background
     cx.fillStyle = enabled ? color : '#444';
     A.roundRect(cx, x, y, w, h, r);
     
-    // Circle
     cx.fillStyle = '#fff';
     cx.beginPath();
     const circleX = enabled ? x + w - r : x + r;
