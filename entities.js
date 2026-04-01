@@ -468,6 +468,7 @@ class TextFloaty extends Entity {
   }
 }
 
+
 A.Entity = Entity;
 A.Player = Player;
 A.Enemy = Enemy;
