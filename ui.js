@@ -56,7 +56,6 @@ A.UI = {
     cx.strokeRect(padding, padding + 115, barWidth, 16);
     
     // Stats on right
-    const rightX = game.canvas.width - padding - 150;
     cx.fillStyle = '#fff';
     cx.font = 'bold 12px Arial';
     cx.textAlign = 'right';
@@ -114,7 +113,9 @@ A.UI = {
     cx.fillStyle = '#fff';
     cx.font = '18px Arial';
     cx.textAlign = 'center';
-    cx.fillText(`Level: ${game.player.level}`, game.canvas.width / 2, game.canvas.height / 2 - 20);
+    if (game.player) {
+      cx.fillText(`Level: ${game.player.level}`, game.canvas.width / 2, game.canvas.height / 2 - 20);
+    }
     cx.fillText(`Score: ${A.U.fmtNum(game.score)}`, game.canvas.width / 2, game.canvas.height / 2 + 15);
     cx.fillText(`Time: ${A.U.fmtTime(game.gameTime)}`, game.canvas.width / 2, game.canvas.height / 2 + 50);
     cx.fillText(`Enemies Killed: ${game.kills}`, game.canvas.width / 2, game.canvas.height / 2 + 85);
@@ -181,7 +182,7 @@ A.UI = {
     cx.font = 'bold 16px Arial';
     cx.textAlign = 'left';
     const startY = 180;
-    const passives = Object.keys(A.PASS);
+    const passives = Object.keys(A.PASS || {});
     for (let i = 0; i < passives.length; i++){
       const key = passives[i];
       const passive = A.PASS[key];
@@ -222,13 +223,13 @@ A.UI = {
     cx.font = 'bold 18px Arial';
     cx.textAlign = 'left';
     cx.fillText('Screen Shake', 40, 150);
-    const shakeColor = save.settings.screenShake ? '#44ff44' : '#ff4444';
-    A.UI.drawToggle(cx, game.canvas.width - 100, 130, save.settings.screenShake, shakeColor);
+    const shakeColor = (save.settings && save.settings.screenShake) ? '#44ff44' : '#ff4444';
+    A.UI.drawToggle(cx, game.canvas.width - 100, 130, (save.settings && save.settings.screenShake), shakeColor);
     
     // Flash toggle
     cx.fillText('Screen Flash', 40, 210);
-    const flashColor = save.settings.flash ? '#44ff44' : '#ff4444';
-    A.UI.drawToggle(cx, game.canvas.width - 100, 190, save.settings.flash, flashColor);
+    const flashColor = (save.settings && save.settings.flash) ? '#44ff44' : '#ff4444';
+    A.UI.drawToggle(cx, game.canvas.width - 100, 190, (save.settings && save.settings.flash), flashColor);
     
     // Back button
     A.UI.drawButton(cx, game.canvas.width / 2 - 80, game.canvas.height - 80, 160, 50, 'BACK', '#ff6b6b');
@@ -277,6 +278,7 @@ A.UI = {
     cx.textAlign = 'center';
     cx.textBaseline = 'middle';
     cx.fillText(text, x + w / 2, y + h / 2);
+    cx.textBaseline = 'alphabetic';
   },
 
   drawToggle(cx, x, y, enabled, color){
@@ -300,11 +302,11 @@ A.UI = {
     if (!game.lastReaction || Date.now() - game.lastReactionTime > 2000) return;
     
     const alpha = Math.max(0, 1 - (Date.now() - game.lastReactionTime) / 2000);
-    cx.fillStyle = `rgba(${game.lastReaction.col}, ${alpha})`;
     cx.globalAlpha = alpha;
     
     cx.font = 'bold 32px Arial';
     cx.textAlign = 'center';
+    cx.fillStyle = game.lastReaction.col || '#fff';
     cx.fillText(game.lastReaction.name, game.canvas.width / 2, 200);
     
     cx.globalAlpha = 1;
